@@ -1,3 +1,4 @@
+
 // main.js
 import * as THREE from 'three';
 import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.150.1/examples/jsm/controls/OrbitControls.js';
@@ -26,7 +27,7 @@ scene = new THREE.Scene();
 renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(window.devicePixelRatio);
-renderer.physicallyCorrectLights = true;
+renderer.useLegacyLights = false;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 0.3;
 renderer.outputEncoding = THREE.sRGBEncoding;
@@ -98,20 +99,28 @@ player = new THREE.Object3D();
 player.position.set(0, 0.5, 0);
 scene.add(player);
 
-fbxLoader.load('recursos/verano_personaje.fbx', fbx => {
-  fbx.scale.set(0.08, 0.08, 0.08);
-  player.add(fbx);
-  collidables.push(fbx);
+fbxLoader.load(
+  'recursos/verano_personaje.fbx',
+  fbx => {
+    fbx.scale.set(0.08, 0.08, 0.08);
+    player.add(fbx);
+    collidables.push(fbx);
 
-  if (fbx.animations.length > 0) {
-    mixer = new THREE.AnimationMixer(fbx);
-    const clip = fbx.animations[0];
-    const action = mixer.clipAction(clip);
-    action.play();
+    if (fbx.animations.length > 0) {
+      mixer = new THREE.AnimationMixer(fbx);
+      const clip = fbx.animations[0];
+      const action = mixer.clipAction(clip);
+      action.play();
+    }
+
+    playerControls = new PlayerControls(player, 100, collidables);
+    console.log("FBX cargado con éxito");
+  },
+  undefined,
+  error => {
+    console.error('Error al cargar el modelo FBX:', error);
   }
-
-  playerControls = new PlayerControls(player, 100, collidables);
-});
+);
 
 window.addEventListener('keydown', e => {
   if (e.code in keyState) keyState[e.code] = true;
@@ -150,7 +159,7 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-// PANEL DE FUNCIONES (HUD lateral)
+// HUD lateral
 const panel = document.createElement('div');
 panel.style = `
   position: absolute;
@@ -174,3 +183,4 @@ panel.innerHTML = `
   📸 Cámara orbital con mouse
 `;
 document.body.appendChild(panel);
+
